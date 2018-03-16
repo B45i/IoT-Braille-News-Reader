@@ -16,10 +16,23 @@ void testPins() {
 }
 
 void displayLetter(int letterValue[6]) {
+
 	for(int i=0;i<6;i++) {
 		digitalWrite(braillePins[i], letterValue[i]);
-		delay(1000);
 	}
+
+	int potValue = analogRead(A0);
+	int delayValue = map(potValue, 0, 1023, 500, 2500);
+	Serial.print("Pot reading: ");
+	Serial.print(potValue);
+	Serial.print(", delayValue: ");
+	Serial.println(delayValue);
+	delay(delayValue);
+
+	for(int x=0;x<6;x++) {
+		digitalWrite(braillePins[x], 0);
+	}
+	delay(delayValue/4);
 }
 
 void displayString(String newsString) {
@@ -28,33 +41,33 @@ void displayString(String newsString) {
 		{ 1, 0, 0, 0, 0, 0 },
 		{ 1, 1, 0, 0, 0, 0 },
 		{ 1, 0, 0, 1, 0, 0 },
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		// {,,,,,},
-		{ 1, 0, 1, 0, 1, 1}
+		{ 1, 0, 0, 1, 1, 0 },
+		{ 1, 0, 0, 0, 1, 0 },
+		{ 1, 1, 0, 1, 0, 0 },
+		{ 1, 1, 0, 1, 1, 0 },
+		{ 1, 1, 0, 0, 1, 0 },
+		{ 0, 1, 0, 1, 0, 0 },
+		{ 0, 1, 0, 1, 1, 0 },
+		{ 1, 0, 1, 0, 0, 0 },
+		{ 1, 1, 1, 0, 0, 0 },
+		{ 1, 0, 1, 1, 0, 0 },
+		{ 1, 0, 1, 1, 1, 0 },
+		{ 1, 0, 1, 0, 1, 0 },
+		{ 1, 1, 1, 1, 0, 0 },
+		{ 1, 1, 1, 1, 1, 0 },
+		{ 1, 1, 1, 0, 1, 0 },
+		{ 0, 1, 1, 1, 0, 0 },
+		{ 0, 1, 1, 1, 1, 0 },
+		{ 1, 0, 1, 0, 0, 1 },
+		{ 1, 1, 1, 0, 0, 1 },
+		{ 0, 1, 0, 1, 1, 1 },
+		{ 1, 0, 1, 1, 0, 1 },
+		{ 1, 0, 1, 1, 1, 1 },
+		{ 1, 0, 1, 0, 0, 1 } // a-z
 	};
 
 	for(int i=0;i<newsString.length();i++) {
+		Serial.println(newsString[i]);
 		if(islower(newsString[i])) {
 			displayLetter(alphabets[(int)newsString[i]-97]);
 		}
