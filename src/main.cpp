@@ -1,21 +1,11 @@
-#include <Arduino.h>
 #include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+#include <ESP8266WebServer.h>
 
 
 int braillePins[] = {D1, D2, D3, D4, D5, D6};
 
-void testPins() {
-	// For testing connections
-	for(int i=0;i<6;i++) {
-		digitalWrite(braillePins[i], HIGH);
-		delay(1000);
-	}
-
-	for(int i=0;i<6;i++) {
-		digitalWrite(braillePins[i], LOW);
-		delay(1000);
-	}
-}
+char APIKey[34] = "53b7929e1a204fc4913c32e73d001d38";
 
 void displayLetter(int letterValue[6]) {
 
@@ -111,8 +101,7 @@ void setupWiFi(){
 	}
 	Serial.println("\nConnected : ");
 	Serial.println(WiFi.localIP());
-
-  }
+}
 
 
 void setup() {
@@ -122,5 +111,28 @@ void setup() {
 }
 
 void loop() {
-	displayString(Serial.readString());
+	// displayString(Serial.readString());
+
+	if (WiFi.status() == WL_CONNECTED) {
+
+		HTTPClient http;
+		String newsURL = "http://newsapi.org/v1/articles?source=the-hindu&sortBy=latest&apiKey="+String(APIKey);
+
+		Serial.print("Sending Request to: ");
+		Serial.println(newsURL);
+
+		http.begin(newsURL);
+		int httpCode = http.GET();
+
+		if (httpCode > 0) {
+			Serial.println(http.getString());
+		}
+		else {
+			Serial.println("Unable to connect to newsapi.org");
+		}
+		http.end();
+	}
+	else {
+		Serial.println("WiFI Disconnected !");
+	}
 }
