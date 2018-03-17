@@ -2,26 +2,53 @@
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
+#include <WiFiManager.h>
 
+/*
+the-times-of-india
+google-news-in
+techcrunch
+the-hindu
+the-new-york-times
+bbc-news
+cnn
+fox-news
+nbc-news
+*/
 
 int braillePins[] = {D1, D2, D3, D4, D5, D6};
 
 char APIKey[34] = "374125c2dfa441c9ae156b7378f2f6e9";
 
+char channels[][25] = {
+	"the-times-of-india",
+	"the-hindu",
+	"google-news-in",
+	"techcrunch",
+	"the-new-york-times",
+	"bbc-news",
+	"cnn",
+	"fox-news",
+	"nbc-news",
+	"reuters"
+};
+
 void displayLetter(int letterValue[6]) {
-
-	for(int i=0;i<6;i++) {
-		digitalWrite(braillePins[i], letterValue[i]);
+	while (!digitalRead(D0)) {
+		delay(1);
 	}
+		for(int i=0;i<6;i++) {
+				digitalWrite(braillePins[i], letterValue[i]);
+		}
 
-	int potValue = analogRead(A0);
-	int delayValue = map(potValue, 0, 1023, 500, 2500);
-	delay(delayValue);
+		int potValue = analogRead(A0);
+		int delayValue = map(potValue, 0, 1023, 2500, 250);
+		delay(delayValue);
 
-	for(int x=0;x<6;x++) {
-		digitalWrite(braillePins[x], 0);
-	}
-	delay(delayValue/4);
+		for(int x=0;x<6;x++) {
+			digitalWrite(braillePins[x], 0);
+		}
+		delay(delayValue/4);
 }
 
 void displayString(String newsString) {
@@ -91,24 +118,29 @@ void setupPins() {
 	for(int i=0;i<6;i++) {
 		pinMode(braillePins[i], OUTPUT);
 	}
+
+	pinMode(D0, INPUT);
 }
 
-void setupWiFi(){
-	Serial.println("\nConnecting...");
-	WiFi.begin("MITS", "mits@12345");
-	while(WiFi.status() != WL_CONNECTED){
-		Serial.print(".");
-		delay(500);
-	}
-	Serial.println("\nConnected : ");
-	Serial.println(WiFi.localIP());
-}
-
+// void setupWiFi(){
+// 	Serial.println("\nConnecting...");
+// 	WiFi.begin("MITS", "mits@12345");
+// 	while(WiFi.status() != WL_CONNECTED){
+// 		Serial.print(".");
+// 		delay(500);
+// 	}
+// 	Serial.println("\nConnected : ");
+// 	Serial.println(WiFi.localIP());
+// }
 
 void setup() {
 	Serial.begin(115200);
 	setupPins();
-	setupWiFi();
+	//setupWiFi();
+
+	WiFiManager wifiManager;
+	wifiManager.autoConnect("Braille-News-Reader");
+	Serial.println("Connected ");
 }
 
 void loop() {
