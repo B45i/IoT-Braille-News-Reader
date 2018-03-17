@@ -30,11 +30,12 @@ String currentChannel = channels[currentChannelNum];
 
 void nextChannel() {
 	unsigned long currentTime = millis();
-	if(currentTime-lastInterruptTimeD7>250) {
+	if(currentTime-lastInterruptTimeD7>500) {
 		lastInterruptTimeD7 = currentTime;
 		currentChannelNum = (currentChannelNum+1)%10;
 		currentChannel = channels[currentChannelNum];
 		nextFlag = true;
+		Serial.print("Changing channel to: ");
 		Serial.println(currentChannel);
 	}
 }
@@ -125,9 +126,9 @@ void displayString(String newsString) {
 
 
 		if(nextFlag) {
+			nextFlag = false;
 			newsCount = 11;
 			i = newsString.length();
-			nextFlag = false;
 		}
 	}
 }
@@ -187,6 +188,7 @@ void loop() {
 			newsJSON = http.getString();
 			JsonObject& root = jsonBuffer.parseObject(newsJSON);
 			JsonArray& articles = root["articles"];
+			displayString(currentChannel);
 
 			for(newsCount=0;newsCount<10;newsCount++) {
 				displayString(articles[newsCount]["title"]);
