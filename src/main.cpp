@@ -4,23 +4,13 @@
 #include <ArduinoJson.h>
 #include <WiFiManager.h>
 
-/*
-the-times-of-india
-google-news-in
-techcrunch
-the-hindu
-the-new-york-times
-bbc-news
-cnn
-fox-news
-nbc-news
-*/
-
 int braillePins[] = {D1, D2, D3, D4, D5, D6};
+int currentChannelNum = 0;
+unsigned long lastInterruptTimeD7 = 0;
+unsigned long lastInterruptTimeD8 = 0;
 
-char APIKey[34] = "374125c2dfa441c9ae156b7378f2f6e9";
-
-char channels[][25] = {
+String APIKey = "374125c2dfa441c9ae156b7378f2f6e9";
+String channels[] = {
 	"the-times-of-india",
 	"the-hindu",
 	"google-news-in",
@@ -32,6 +22,23 @@ char channels[][25] = {
 	"nbc-news",
 	"reuters"
 };
+
+String currentChannel = channels[currentChannelNum];
+
+void nextChannel() {
+	unsigned long currentTime = millis();
+	if(currentTime-lastInterruptTimeD7>250) {
+		lastInterruptTimeD7 = currentTime;
+		currentChannelNum = (currentChannelNum+1)%10;
+		currentChannel = channels[currentChannelNum];
+		Serial.println(currentChannel);
+	}
+}
+
+void previousChannel() {
+	currentChannelNum = (currentChannelNum+1)%10;
+	currentChannel = channels[currentChannelNum];
+}
 
 void displayLetter(int letterValue[6]) {
 	while (!digitalRead(D0)) {
@@ -120,6 +127,8 @@ void setupPins() {
 	}
 
 	pinMode(D0, INPUT);
+	pinMode(D7, INPUT);
+	pinMode(D8, INPUT);
 }
 
 // void setupWiFi(){
@@ -136,6 +145,7 @@ void setupPins() {
 void setup() {
 	Serial.begin(115200);
 	setupPins();
+	attachInterrupt(digitalPinToInterrupt(D7), nextChannel, HIGH);
 	//setupWiFi();
 
 	WiFiManager wifiManager;
@@ -154,7 +164,7 @@ void loop() {
 		String newsJSON;
 
 		HTTPClient http;
-		String newsURL = "http://newsapi.org/v1/articles?source=the-hindu&sortBy=latest&apiKey="+String(APIKey);
+		String newsURL = "http://newsapi.org/v1/articles?source="+currentChannel+"&sortBy=latest&apiKey="+APIKey;
 
 		Serial.print("Sending Request to: ");
 		Serial.println(newsURL);
