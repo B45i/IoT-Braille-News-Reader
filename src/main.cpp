@@ -4,6 +4,9 @@
 #include <ArduinoJson.h>
 #include <WiFiManager.h>
 
+
+bool nextFlag = false;
+int newsCount;
 int braillePins[] = {D1, D2, D3, D4, D5, D6};
 int currentChannelNum = 0;
 unsigned long lastInterruptTimeD7 = 0;
@@ -31,6 +34,7 @@ void nextChannel() {
 		lastInterruptTimeD7 = currentTime;
 		currentChannelNum = (currentChannelNum+1)%10;
 		currentChannel = channels[currentChannelNum];
+		nextFlag = true;
 		Serial.println(currentChannel);
 	}
 }
@@ -118,6 +122,13 @@ void displayString(String newsString) {
 			displayLetter(numberSymbol);
 			displayLetter(alphabets[(int)newsString[i]-48]);
 		}
+
+
+		if(nextFlag) {
+			newsCount = 11;
+			i = newsString.length();
+			nextFlag = false;
+		}
 	}
 }
 
@@ -177,9 +188,9 @@ void loop() {
 			JsonObject& root = jsonBuffer.parseObject(newsJSON);
 			JsonArray& articles = root["articles"];
 
-			for(int i=0;i<10;i++) {
-				displayString(articles[i]["title"]);
-				displayString(articles[i]["description"]);
+			for(newsCount=0;newsCount<10;newsCount++) {
+				displayString(articles[newsCount]["title"]);
+				displayString(articles[newsCount]["description"]);
 			}
 		}
 		else {
