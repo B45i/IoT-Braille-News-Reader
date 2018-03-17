@@ -5,7 +5,8 @@
 #include <WiFiManager.h>
 
 
-bool nextFlag = false;
+bool nextChannelFlag = false;
+bool nextNewsFlag = false;
 int newsCount;
 int braillePins[] = {D1, D2, D3, D4, D5, D6};
 int currentChannelNum = 0;
@@ -34,15 +35,20 @@ void nextChannel() {
 		lastInterruptTimeD7 = currentTime;
 		currentChannelNum = (currentChannelNum+1)%10;
 		currentChannel = channels[currentChannelNum];
-		nextFlag = true;
+		nextChannelFlag = true;
 		Serial.print("Changing channel to: ");
 		Serial.println(currentChannel);
 	}
 }
 
-void previousChannel() {
-	currentChannelNum = (currentChannelNum+1)%10;
-	currentChannel = channels[currentChannelNum];
+void nextNews() {
+	unsigned long currentTime = millis();
+	if(currentTime-lastInterruptTimeD8>500) {
+		lastInterruptTimeD8 = currentTime;
+		newsCount = (newsCount+1)%10;
+		nextNewsFlag = true;
+		Serial.println("Changing News..");
+	}
 }
 
 void displayLetter(int letterValue[6]) {
@@ -124,10 +130,14 @@ void displayString(String newsString) {
 			displayLetter(alphabets[(int)newsString[i]-48]);
 		}
 
-
-		if(nextFlag) {
-			nextFlag = false;
+		if(nextChannelFlag) {
+			nextChannelFlag = false;
 			newsCount = 11;
+			i = newsString.length();
+		}
+
+		if(nextNewsFlag) {
+			nextNewsFlag = false;
 			i = newsString.length();
 		}
 	}
@@ -158,6 +168,7 @@ void setup() {
 	Serial.begin(115200);
 	setupPins();
 	attachInterrupt(digitalPinToInterrupt(D7), nextChannel, HIGH);
+	attachInterrupt(digitalPinToInterrupt(D8), nextNews, HIGH);
 	//setupWiFi();
 
 	WiFiManager wifiManager;
