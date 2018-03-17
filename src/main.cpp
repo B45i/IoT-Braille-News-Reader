@@ -1,11 +1,12 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266HTTPClient.h>
 #include <ESP8266WebServer.h>
+#include <ArduinoJson.h>
 
 
 int braillePins[] = {D1, D2, D3, D4, D5, D6};
 
-char APIKey[34] = "53b7929e1a204fc4913c32e73d001d38";
+char APIKey[34] = "374125c2dfa441c9ae156b7378f2f6e9";
 
 void displayLetter(int letterValue[6]) {
 
@@ -115,6 +116,11 @@ void loop() {
 
 	if (WiFi.status() == WL_CONNECTED) {
 
+		const size_t bufferSize = JSON_ARRAY_SIZE(10) + JSON_OBJECT_SIZE(4) + 10*JSON_OBJECT_SIZE(6) + 7610;
+		DynamicJsonBuffer jsonBuffer(bufferSize);
+
+		String newsJSON;
+
 		HTTPClient http;
 		String newsURL = "http://newsapi.org/v1/articles?source=the-hindu&sortBy=latest&apiKey="+String(APIKey);
 
@@ -125,7 +131,14 @@ void loop() {
 		int httpCode = http.GET();
 
 		if (httpCode > 0) {
-			Serial.println(http.getString());
+			newsJSON = http.getString();
+			JsonObject& root = jsonBuffer.parseObject(newsJSON);
+			JsonArray& articles = root["articles"];
+
+			for(int i=0;i<10;i++) {
+				displayString(articles[i]["title"]);
+				displayString(articles[i]["description"]);
+			}
 		}
 		else {
 			Serial.println("Unable to connect to newsapi.org");
