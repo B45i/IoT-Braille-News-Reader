@@ -17,6 +17,4 @@ The braille is displayed using a 3*2 matrix of solenoid push pulls.
 The user can put their hand upon the device and get a tactile feed back.
 There is knob to adjust the reading speed. There are two buttons to change the current news being displayed and news source.
 ## **Schematics**
-```
-
-```
+![Schematics](/images/Schematic.png)
